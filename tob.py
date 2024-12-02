@@ -414,8 +414,8 @@ elif page == "Product Showcase":
         # 格式化适用肤质和成分显示
         suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
         ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
-        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else ""
-        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
+        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else "sentiment,"
+        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else "review summary x available."
         
         # 清理适用字段
         suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
@@ -435,10 +435,10 @@ elif page == "Product Showcase":
             container_style = "border:2px solid #26725e; padding:10px; border-radius:5px; background-color:#e5fff6;"
         elif is_good:
             badge = '<span style="background-color:#fec692; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Good Match</span>'
-            container_style = "border:2px solid #FF9800; padding:10px; border-radius:5px; background-color:#fff9f1;"
+            container_style = "border:2px solid #fec692; padding:10px; border-radius:5px; background-color:#fff9f1;"
         else:  # is_maybe
             badge = '<span style="background-color:#d48ba3; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Maybe</span>'
-            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#fff8fa;"
+            container_style = "border:2px solid #d48ba3; padding:10px; border-radius:5px; background-color:#fff8fa;"
     
         # 构建 HTML 内容
         html_content = f"""
