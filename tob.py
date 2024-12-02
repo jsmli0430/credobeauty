@@ -376,6 +376,18 @@ elif page == "Product Showcase":
     # 显示产品数量
     st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
     
+    # 定义一个函数来格式化适用肤质和成分
+    def format_display(field_value):
+        if field_value:
+            # 移除方括号和引号
+            clean_value = field_value.strip("[]").replace("'", "").replace('"', "")
+            items = [item.strip() for item in clean_value.split(',') if item.strip()]
+            return ", ".join([
+                f'<span style="background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;">{item}</span>'
+                for item in items
+            ])
+        return ""
+    
     for _, row in filtered_df.iterrows():
         # 确保字段存在并处理 NaN
         brand_name = row.get('brand_name', 'Unknown Brand') or 'Unknown Brand'
@@ -391,37 +403,21 @@ elif page == "Product Showcase":
         # 处理推荐逻辑
         is_recommended = False
         if selected_skin_type:
-            # 移除方括号并分割
+            # 清理适用肤质字段
             suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
             product_skin_types = [skin.strip() for skin in suitable_clean.split(',') if skin.strip()]
             # 检查是否有匹配的肤质
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
         
-        # 处理适用肤质和成分显示，去除方括号和引号
-        def format_display(field_value):
-            if field_value:
-                # 移除方括号和引号
-                clean_value = field_value.strip("[]").replace("'", "").replace('"', "")
-                items = [item.strip() for item in clean_value.split(',') if item.strip()]
-                return ", ".join([
-                    f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{item}</span>"
-                    for item in items
-                ])
-            return ""
-        
-        suitable_display = ""
-        if suitable_type:
-            suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>"
-        
-        ingredients_display = ""
-        if ingredients:
-            ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>"
+        # 格式化适用肤质和成分显示
+        suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
+        ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
+        sentiment_display = f"<p><strong>Sentiment:</strong> {str(sentiment)}%</p>" if sentiment else ""
+        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
         
         # 定义 CSS 样式基于推荐
         if is_recommended:
-            badge = """
-                <span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>
-            """
+            badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
         else:
             badge = ""
@@ -440,15 +436,13 @@ elif page == "Product Showcase":
                         <p><strong>Brand:</strong> {brand_name}</p>
                         {suitable_display}
                         {ingredients_display}
-                        {"<p><strong>Sentiment:</strong> " + str(sentiment) + "</p>" if sentiment else ""}
-                        {"<p><strong>Review:</strong> " + first_sentence + "</p>" if first_sentence else ""}
+                        {sentiment_display}
+                        {review_display}
                     </div>
                 </div>
             </div>
             <br/>
         """
         
-        st.markdown(
-            html_content,
-            unsafe_allow_html=True
-        )
+        # 渲染 HTML 内容
+        st.markdown(html_content, unsafe_allow_html=True)
