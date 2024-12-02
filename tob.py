@@ -423,6 +423,7 @@ elif page == "Product Showcase":
             badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
         else:
+            badge = '<span style="background-color:#faaaa0; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Maybe</span>'
             container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#ffffff;"
     
         # 构建 HTML 内容
