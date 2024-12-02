@@ -345,7 +345,7 @@ elif page == "Product Showcase":
     st.sidebar.header("Filter Options")
     selected_skin_type = st.sidebar.multiselect(
         "Select Skin Type",
-        options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin"],
+        options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin","acne-prone skin","aging skin"],
         default=[]
     )
     price_max = int(df_credo['price'].max()) if not df_credo['price'].isnull().all() else 100
@@ -388,9 +388,9 @@ elif page == "Product Showcase":
             ])
         return ""
 
-    # 遍历每个产品并展示
+   # Iterate through each product and display
     for _, row in filtered_df.iterrows():
-        # 确保字段存在并处理 NaN
+        # Ensure fields exist and handle NaN
         brand_name = row.get('brand_name', 'Unknown Brand') or 'Unknown Brand'
         product_name = row.get('product_name', 'Unknown Product') or 'Unknown Product'
         price = row['price']
@@ -402,49 +402,48 @@ elif page == "Product Showcase":
         first_sentence = row['first_sentence']
         image_url = row.get('image_url', 'https://via.placeholder.com/150')
 
-        # 处理推荐逻辑
+        # Handle recommendation logic
         is_recommended = False
         if selected_skin_type:
-            # 清理适用肤质字段
+            # Clean suitable skin type field
             suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
             product_skin_types = [skin.strip() for skin in suitable_clean.split(',') if skin.strip()]
-            # 检查是否有匹配的肤质
+            # Check if there are matching skin types
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
 
-        # 格式化适用肤质和成分显示
+        # Format suitable types and ingredients for display
         suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
         ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
         sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else ""
         review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
 
-        # 定义 CSS 样式基于推荐
-        if is_recommended:
-            badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
-            container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
-        else:
-            badge = ""
-            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#ffffff;"
+    # Define CSS styles based on recommendation
+    badge = ""
+    container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#ffffff;"  # Default style
+    if is_recommended:
+        badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
+        container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"  # Highlighted style
 
-        # 构建 HTML 内容
-        html_content = f"""
-            <div style="{container_style}">
-                <div style="display: flex; align-items: center;">
-                    <img src="{image_url}" width="150" style="border-radius:5px;">
-                    <div style="margin-left:20px; flex: 1;">
-                        <h3 style="margin:0;">{brand_name}: {product_name}</h3>
-                        {badge}
-                        <p><strong>Price:</strong> ${price}</p>
-                        <p><strong>Rating:</strong> {rating} ({reviews} reviews)</p>
-                        <p><strong>Brand:</strong> {brand_name}</p>
-                        {suitable_display}
-                        {ingredients_display}
-                        {sentiment_display}
-                        {review_display}
-                    </div>
+    # Build HTML content
+    html_content = f"""
+        <div style="{container_style}">
+            <div style="display: flex; align-items: center;">
+                <img src="{image_url}" width="150" style="border-radius:5px;">
+                <div style="margin-left:20px; flex: 1;">
+                    <h3 style="margin:0;">{brand_name}: {product_name}</h3>
+                    {badge}
+                    <p><strong>Price:</strong> ${price}</p>
+                    <p><strong>Rating:</strong> {rating} ({reviews} reviews)</p>
+                    <p><strong>Brand:</strong> {brand_name}</p>
+                    {suitable_display}
+                    {ingredients_display}
+                    {sentiment_display}
+                    {review_display}
                 </div>
             </div>
-            <br/>
-        """
+        </div>
+        <br/>
+    """
 
-        # 渲染 HTML 内容
-        st.markdown(html_content, unsafe_allow_html=True)
+    # Render HTML content
+    st.markdown(html_content, unsafe_allow_html=True)
