@@ -341,100 +341,79 @@ if page == "Overview Metrics":
 elif page == "Product Showcase":
     st.title("Product Showcase")
     
-# Streamlit App
-st.title("Product Showcase")
-
-# Filter options
-st.sidebar.header("Filter Options")
-selected_skin_type = st.sidebar.multiselect(
-    "Select Skin Type",
-    options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin"],
-    default=[]
-)
-price_range = st.sidebar.slider(
-    "Price Range",
-    0, 
-    int(df_credo['price'].max()), 
-    (0, 100)
-)
-
-# Filter data based on price
-filtered_df = df_credo[
-    (df_credo['price'] >= price_range[0]) & 
-    (df_credo['price'] <= price_range[1])
-]
-
-# Clean 'suitable_type' for consistent matching
-filtered_df['suitable_type'] = filtered_df['suitable_type'].apply(
-    lambda x: x.lower().strip() if isinstance(x, str) else ""
-)
-
-# Filter recommended products
-recommended_products = filtered_df[
-    filtered_df['suitable_type'].apply(
-        lambda x: any(skin.strip() in x.split(',') for skin in [s.lower() for s in selected_skin_type])
+    # Filter options
+    st.sidebar.header("Filter Options")
+    selected_skin_type = st.sidebar.multiselect(
+        "Select Skin Type",
+        options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin"],
+        default=[]
     )
-]
-
-# Non-recommended products
-non_recommended_products = filtered_df[~filtered_df.index.isin(recommended_products.index)]
-
-# Combine: recommended products at the top
-final_df = pd.concat([recommended_products, non_recommended_products])
-
-# Show number of products
-st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
-
-# Display products
-for _, row in final_df.iterrows():
-    # Determine if this product is recommended
-    is_recommended = row.name in recommended_products.index
-
-    # Recommended label
-    recommended_label = (
-        '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
-        if is_recommended else ""
+    price_range = st.sidebar.slider(
+        "Price Range",
+        0, 
+        int(df_credo['price'].max()), 
+        (0, 100)
     )
-
-    # Parse and format fields
-    suitable_for = ", ".join(row['suitable_type'].strip("[]").replace("'", "").split(", ")) if row['suitable_type'] else "N/A"
-    ingredients = ", ".join(row['ingredients'].strip("[]").replace("'", "").split(", ")) if row.get('ingredients') else "N/A"
-
-    # Render product details in Streamlit
-    st.markdown(
-        f"""
-        <div style="border:2px solid {'#4CAF50' if is_recommended else '#ccc'}; padding:10px; border-radius:5px; background-color:{'#f9fff9' if is_recommended else 'white'}; margin-bottom: 10px;">
-            <h3>{row['brand_name']}: {row['product_name']}</h3>
-            {recommended_label}
-            <p><strong>Price:</strong> ${row['price']}</p>
-            <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
-            <p><strong>Brand:</strong> {row['brand_name']}</p>
-            <p><strong>Suitable for:</strong> {suitable_for}</p>
-            <p><strong>Ingredients:</strong> {ingredients}</p>
-            <p><strong>Sentiment:</strong> {row['sentiment'] if row.get('sentiment') else "N/A"}</p>
-            <p><strong>Review:</strong> {row['first_sentence'] if row.get('first_sentence') else "N/A"}</p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# Option to display raw HTML
-st.sidebar.subheader("Raw HTML Display")
-if st.sidebar.checkbox("Show HTML Code Example"):
-    html_code = """
-    <div style="border: 2px solid #4CAF50; padding: 10px; border-radius: 5px; background-color: #f9fff9; margin-bottom: 10px;">
-        <h3>54 Thrones: Moisturizing Butter Cream Body Wash</h3>
-        <span style="background-color: #4CAF50; color: white; padding: 2px 6px; border-radius: 3px; font-size: 12px;">Recommended for you</span>
-        <p><strong>Price:</strong> $30.0</p>
-        <p><strong>Rating:</strong> 5.0 (32.0 reviews)</p>
-        <p><strong>Brand:</strong> 54 Thrones</p>
-        <p><strong>Suitable for:</strong> all skin</p>
-        <p><strong>Ingredients:</strong> repair, anti-aging, antioxidants, sun protection, moisture, alcohol, exfoliating</p>
-    </div>
-    """
-    st.markdown(f"""
-    <pre style="background-color: #f6f8fa; padding: 10px; border-radius: 6px;">
-    <code>{html_code}</code>
-    </pre>
-    """, unsafe_allow_html=True)
-
+    
+    # Filter data based on price
+    filtered_df = df_credo[
+        (df_credo['price'] >= price_range[0]) & 
+        (df_credo['price'] <= price_range[1])
+    ]
+    
+    # Show number of products
+    st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
+    
+    for _, row in filtered_df.iterrows():
+        # Check if recommended
+        is_recommended = False
+        if selected_skin_type:
+            product_skin_types = row['suitable_type'].split(',') if isinstance(row['suitable_type'], str) else []
+            is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
+        
+        # Define CSS style based on recommendation
+        if is_recommended:
+            st.markdown(
+                f"""
+                <div style="border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
+                        <div style="margin-left:20px;">
+                            <h3 style="margin:0;">{row['brand_name']}: {row['product_name']}</h3>
+                            <span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>
+                            <p><strong>Price:</strong> ${row['price']}</p>
+                            <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
+                            <p><strong>Brand:</strong> {row['brand_name']}</p>
+                            {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
+                            {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
+                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
+                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                """,
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                f"""
+                <div style="border:1px solid #ccc; padding:10px; border-radius:5px;">
+                    <div style="display: flex; align-items: center;">
+                        <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
+                        <div style="margin-left:20px;">
+                            <h3 style="margin:0;">{row['brand_name']}: {row['product_name']}</h3>
+                            <p><strong>Price:</strong> ${row['price']}</p>
+                            <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
+                            <p><strong>Brand:</strong> {row['brand_name']}</p>
+                            {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
+                            {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
+                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
+                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                """,
+                unsafe_allow_html=True
+            )
