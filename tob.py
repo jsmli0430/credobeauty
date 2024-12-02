@@ -405,11 +405,8 @@ elif page == "Product Showcase":
         # 格式化适用肤质和成分显示
         suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
         ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
-        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else ""
-        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
-
-        sentiment_display = sentiment_display if sentiment else ""
-        review_display = review_display if reviews else ""
+        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else "sentiment"
+        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else "review summary not available"
     
         # 检查推荐逻辑
         is_recommended = False
