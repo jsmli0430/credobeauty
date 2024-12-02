@@ -348,7 +348,7 @@ elif page == "Product Showcase":
         options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin","acne-prone skin","aging skin"],
         default=["all skin"]
     )
-        selected_hair_type = st.sidebar.multiselect(
+    selected_hair_type = st.sidebar.multiselect(
         "Select Hair Type",
         options=[
             "all hair", "damaged hair", "dry hair", "oily hair", 
