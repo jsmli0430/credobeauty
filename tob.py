@@ -348,10 +348,11 @@ elif page == "Product Showcase":
         options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin"],
         default=[]
     )
+    price_max = int(df_credo['price'].max()) if not df_credo['price'].isnull().all() else 100
     price_range = st.sidebar.slider(
         "Price Range",
         0, 
-        int(df_credo['price'].max()) if not df_credo['price'].isnull().all() else 100, 
+        price_max, 
         (0, 100)
     )
     
@@ -381,7 +382,7 @@ elif page == "Product Showcase":
         product_name = row.get('product_name', 'Unknown Product') or 'Unknown Product'
         price = row['price']
         rating = row['rating']
-        reviews = row['reviews']
+        reviews = int(row['reviews']) if row['reviews'] else 0
         suitable_type = row['suitable_type']
         ingredients = row['ingredients']
         sentiment = row['sentiment']
@@ -390,29 +391,31 @@ elif page == "Product Showcase":
         # 处理推荐逻辑
         is_recommended = False
         if selected_skin_type:
-            # 分割并清理适用肤质
-            product_skin_types = [skin.strip().strip("'").strip('"') for skin in suitable_type.split(',') if skin.strip()]
+            # 移除方括号并分割
+            suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
+            product_skin_types = [skin.strip() for skin in suitable_clean.split(',') if skin.strip()]
             # 检查是否有匹配的肤质
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
         
-        # 处理适用肤质和成分显示，去除方括号和单引号
-        if suitable_type:
-            product_skin_types_display = ", ".join([skin.strip().strip("'").strip('"') for skin in suitable_type.split(',') if skin.strip()])
-            suitable_display = f"<p><strong>Suitable for:</strong> " + ", ".join([
-                f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin}</span>" 
-                for skin in product_skin_types_display.split(", ")
-            ]) + "</p>"
-        else:
-            suitable_display = ""
+        # 处理适用肤质和成分显示，去除方括号和引号
+        def format_display(field_value):
+            if field_value:
+                # 移除方括号和引号
+                clean_value = field_value.strip("[]").replace("'", "").replace('"', "")
+                items = [item.strip() for item in clean_value.split(',') if item.strip()]
+                return ", ".join([
+                    f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{item}</span>"
+                    for item in items
+                ])
+            return ""
         
+        suitable_display = ""
+        if suitable_type:
+            suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>"
+        
+        ingredients_display = ""
         if ingredients:
-            product_ingredients_display = ", ".join([ing.strip().strip("'").strip('"') for ing in ingredients.split(',') if ing.strip()])
-            ingredients_display = f"<p><strong>Ingredients:</strong> " + ", ".join([
-                f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing}</span>" 
-                for ing in product_ingredients_display.split(", ")
-            ]) + "</p>"
-        else:
-            ingredients_display = ""
+            ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>"
         
         # 定义 CSS 样式基于推荐
         if is_recommended:
