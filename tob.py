@@ -340,7 +340,7 @@ if page == "Overview Metrics":
 
 elif page == "Product Showcase":
     st.title("Product Showcase")
-    
+
     # 过滤选项
     st.sidebar.header("Filter Options")
     selected_skin_type = st.sidebar.multiselect(
@@ -355,27 +355,27 @@ elif page == "Product Showcase":
         price_max, 
         (0, 100)
     )
-    
+
     # 过滤数据基于价格
     filtered_df = df_credo[
         (df_credo['price'] >= price_range[0]) & 
         (df_credo['price'] <= price_range[1])
     ].copy()
-    
+
     # 替换 NaN 值
     numeric_fields = ['price', 'rating', 'reviews', 'sentiment']
     for field in numeric_fields:
         if field in filtered_df.columns:
             filtered_df[field] = filtered_df[field].fillna(0)
-    
+
     string_fields = ['suitable_type', 'ingredients', 'first_sentence']
     for field in string_fields:
         if field in filtered_df.columns:
             filtered_df[field] = filtered_df[field].fillna('')
-    
+
     # 显示产品数量
     st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
-    
+
     # 定义一个函数来格式化适用肤质和成分
     def format_display(field_value):
         if field_value:
@@ -387,7 +387,8 @@ elif page == "Product Showcase":
                 for item in items
             ])
         return ""
-    
+
+    # 遍历每个产品并展示
     for _, row in filtered_df.iterrows():
         # 确保字段存在并处理 NaN
         brand_name = row.get('brand_name', 'Unknown Brand') or 'Unknown Brand'
@@ -399,7 +400,8 @@ elif page == "Product Showcase":
         ingredients = row['ingredients']
         sentiment = row['sentiment']
         first_sentence = row['first_sentence']
-        
+        image_url = row.get('image_url', 'https://via.placeholder.com/150')
+
         # 处理推荐逻辑
         is_recommended = False
         if selected_skin_type:
@@ -408,27 +410,27 @@ elif page == "Product Showcase":
             product_skin_types = [skin.strip() for skin in suitable_clean.split(',') if skin.strip()]
             # 检查是否有匹配的肤质
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
-        
+
         # 格式化适用肤质和成分显示
         suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
         ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
-        sentiment_display = f"<p><strong>Sentiment:</strong> {str(sentiment)}%</p>" if sentiment else ""
+        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else ""
         review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
-        
+
         # 定义 CSS 样式基于推荐
         if is_recommended:
             badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
         else:
             badge = ""
-            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px;"
-        
+            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#ffffff;"
+
         # 构建 HTML 内容
         html_content = f"""
             <div style="{container_style}">
                 <div style="display: flex; align-items: center;">
-                    <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
-                    <div style="margin-left:20px;">
+                    <img src="{image_url}" width="150" style="border-radius:5px;">
+                    <div style="margin-left:20px; flex: 1;">
                         <h3 style="margin:0;">{brand_name}: {product_name}</h3>
                         {badge}
                         <p><strong>Price:</strong> ${price}</p>
@@ -443,6 +445,6 @@ elif page == "Product Showcase":
             </div>
             <br/>
         """
-        
+
         # 渲染 HTML 内容
         st.markdown(html_content, unsafe_allow_html=True)
