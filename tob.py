@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import re
+import random
 
 # Load data
 @st.cache_resource
@@ -370,6 +371,8 @@ elif page == "Product Showcase":
         (df_credo['price'] >= price_range[0]) & 
         (df_credo['price'] <= price_range[1])
     ].copy()
+
+    filtered_df = filtered_df.sample(frac=1, random_state=42)
 
     # 替换 NaN 值
     numeric_fields = ['price', 'rating', 'reviews', 'sentiment']
