@@ -346,8 +346,17 @@ elif page == "Product Showcase":
     selected_skin_type = st.sidebar.multiselect(
         "Select Skin Type",
         options=["all skin", "dry skin", "oily skin", "sensitive skin", "normal skin", "combination skin","acne-prone skin","aging skin"],
+        default=["all skin"]
+    )
+        selected_hair_type = st.sidebar.multiselect(
+        "Select Hair Type",
+        options=[
+            "all hair", "damaged hair", "dry hair", "oily hair", 
+            "curly hair", "fine hair", "straight hair"
+        ],
         default=[]
     )
+
     price_max = int(df_credo['price'].max()) if not df_credo['price'].isnull().all() else 100
     price_range = st.sidebar.slider(
         "Price Range",
@@ -401,30 +410,35 @@ elif page == "Product Showcase":
         sentiment = row['sentiment']
         first_sentence = row['first_sentence']
         image_url = row.get('image_url', 'https://via.placeholder.com/150')
-    
+        
         # 格式化适用肤质和成分显示
         suitable_display = f"<p><strong>Suitable for:</strong> {format_display(suitable_type)}</p>" if suitable_type else ""
         ingredients_display = f"<p><strong>Ingredients:</strong> {format_display(ingredients)}</p>" if ingredients else ""
-        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else "sentiment"
-        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else "review summary not available"
+        sentiment_display = f"<p><strong>Sentiment:</strong> {sentiment}</p>" if sentiment else ""
+        review_display = f"<p><strong>Review:</strong> {first_sentence}</p>" if first_sentence else ""
+        
+        # 清理适用字段
+        suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
+        product_types = [item.strip() for item in suitable_clean.split(',') if item.strip()]
     
-        # 检查推荐逻辑
-        is_recommended = False
-        if selected_skin_type:
-            # 清理适用肤质字段
-            suitable_clean = suitable_type.strip("[]").replace("'", "").replace('"', "")
-            product_skin_types = [skin.strip() for skin in suitable_clean.split(',') if skin.strip()]
-            # 检查是否有匹配的肤质
-            is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
+        # 用户选择的所有条件
+        selected_types = selected_skin_type + selected_hair_type
     
-        # 定义 CSS 样式
-        badge = ""
-        if is_recommended:
-            badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
-            container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
-        else:
-            badge = '<span style="background-color:#faaaa0; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Maybe</span>'
-            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#faf1f0;"
+        # 推荐等级逻辑
+        is_recommend = all(option in product_types for option in selected_types)
+        is_good = any(option in product_types for option in selected_types) and not is_recommend
+        is_maybe = not is_good and not is_recommend
+    
+        # 定义 CSS 样式和徽章
+        if is_recommend:
+            badge = '<span style="background-color:#26725e; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
+            container_style = "border:2px solid #26725e; padding:10px; border-radius:5px; background-color:#e5fff6;"
+        elif is_good:
+            badge = '<span style="background-color:#fec692; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Good Match</span>'
+            container_style = "border:2px solid #FF9800; padding:10px; border-radius:5px; background-color:#fff9f1;"
+        else:  # is_maybe
+            badge = '<span style="background-color:#d48ba3; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Maybe</span>'
+            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#fff8fa;"
     
         # 构建 HTML 内容
         html_content = f"""
