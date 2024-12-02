@@ -359,41 +359,24 @@ elif page == "Product Showcase":
     filtered_df = df_credo[
         (df_credo['price'] >= price_range[0]) & 
         (df_credo['price'] <= price_range[1])
-    ].fillna(0)  # Replace NaN with 0
+    ].fillna(0)  # 替换 NaN 为 0
     
-    # Clean and process 'suitable_type' for consistent matching
-    filtered_df['suitable_type'] = filtered_df['suitable_type'].apply(
-        lambda x: x.lower().strip() if isinstance(x, str) else ""
-    )
-    
-    # Filter recommended products
-    recommended_products = filtered_df[
-        filtered_df['suitable_type'].apply(
-            lambda x: any(skin.strip() in x.split(',') for skin in [s.lower() for s in selected_skin_type])
-        )
-    ]
-    
-    # Non-recommended products
-    non_recommended_products = filtered_df[~filtered_df.index.isin(recommended_products.index)]
-    
-    # Combine: recommended products at the top
-    final_df = pd.concat([recommended_products, non_recommended_products])
-
     # Show number of products
     st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
     
-    # Display products
-    for _, row in final_df.iterrows():
-        # Determine if this product is recommended
-        is_recommended = row.name in recommended_products.index
-
-        # Recommended label
+    for _, row in filtered_df.iterrows():
+        # Check if recommended
+        is_recommended = False
+        if selected_skin_type:
+            product_skin_types = row['suitable_type'].split(',') if isinstance(row['suitable_type'], str) else []
+            is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
+        
+        # Define CSS style based on recommendation
         recommended_label = (
             '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             if is_recommended else ""
         )
-
-        # Display product details
+        
         st.markdown(
             f"""
             <div style="border:2px solid {'#4CAF50' if is_recommended else '#ccc'}; padding:10px; border-radius:5px; background-color:{'#f9fff9' if is_recommended else 'white'};">
@@ -416,3 +399,4 @@ elif page == "Product Showcase":
             """,
             unsafe_allow_html=True
         )
+
