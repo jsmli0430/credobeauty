@@ -338,32 +338,9 @@ if page == "Overview Metrics":
     else:
         st.write('No common brands between Credo and Sephora.')
 
-import streamlit as st
-import pandas as pd
-
-# Sample DataFrame
-data = {
-    "brand_name": ["54 Thrones", "54 Thrones", "54 Thrones"],
-    "product_name": [
-        "Moisturizing Butter Cream Body Wash",
-        "Barrier Repair Cloud Cream",
-        "Ugandan Vanilla + Ethiopian Honey Beauty Butter"
-    ],
-    "price": [30.0, 36.0, 28.0],
-    "rating": [5.0, 4.8, 4.5],
-    "reviews": [32.0, 71.0, 50.0],
-    "suitable_type": ["all skin", "dry skin, normal skin, combination skin", "oily skin, sensitive skin"],
-    "ingredients": [
-        "repair, anti-aging, antioxidants, sun protection, moisture, alcohol, exfoliating",
-        "repair, anti-aging, sun protection",
-        "moisture, vitamin E, fragrance-free"
-    ],
-    "sentiment": ["80% positive", "90% positive", "75% positive"],
-    "first_sentence": ["Rich, creamy butter.", "Hydrating and soothing.", "Smooth and lightweight."]
-}
-
-df_credo = pd.DataFrame(data)
-
+elif page == "Product Showcase":
+    st.title("Product Showcase")
+    
 # Streamlit App
 st.title("Product Showcase")
 
@@ -460,3 +437,4 @@ if st.sidebar.checkbox("Show HTML Code Example"):
     <code>{html_code}</code>
     </pre>
     """, unsafe_allow_html=True)
+
