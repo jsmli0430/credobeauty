@@ -341,7 +341,7 @@ if page == "Overview Metrics":
 elif page == "Product Showcase":
     st.title("Product Showcase")
     
-    # Filter options
+    # 过滤选项
     st.sidebar.header("Filter Options")
     selected_skin_type = st.sidebar.multiselect(
         "Select Skin Type",
@@ -351,69 +351,101 @@ elif page == "Product Showcase":
     price_range = st.sidebar.slider(
         "Price Range",
         0, 
-        int(df_credo['price'].max()), 
+        int(df_credo['price'].max()) if not df_credo['price'].isnull().all() else 100, 
         (0, 100)
     )
     
-    # Filter data based on price
+    # 过滤数据基于价格
     filtered_df = df_credo[
         (df_credo['price'] >= price_range[0]) & 
         (df_credo['price'] <= price_range[1])
-    ]
+    ].copy()
     
-    # Show number of products
+    # 替换 NaN 值
+    numeric_fields = ['price', 'rating', 'reviews', 'sentiment']
+    for field in numeric_fields:
+        if field in filtered_df.columns:
+            filtered_df[field] = filtered_df[field].fillna(0)
+    
+    string_fields = ['suitable_type', 'ingredients', 'first_sentence']
+    for field in string_fields:
+        if field in filtered_df.columns:
+            filtered_df[field] = filtered_df[field].fillna('')
+    
+    # 显示产品数量
     st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
     
     for _, row in filtered_df.iterrows():
-        # Check if recommended
+        # 确保字段存在并处理 NaN
+        brand_name = row.get('brand_name', 'Unknown Brand') or 'Unknown Brand'
+        product_name = row.get('product_name', 'Unknown Product') or 'Unknown Product'
+        price = row['price']
+        rating = row['rating']
+        reviews = row['reviews']
+        suitable_type = row['suitable_type']
+        ingredients = row['ingredients']
+        sentiment = row['sentiment']
+        first_sentence = row['first_sentence']
+        
+        # 处理推荐逻辑
         is_recommended = False
         if selected_skin_type:
-            product_skin_types = row['suitable_type'].split(',') if isinstance(row['suitable_type'], str) else []
+            # 分割并清理适用肤质
+            product_skin_types = [skin.strip().strip("'").strip('"') for skin in suitable_type.split(',') if skin.strip()]
+            # 检查是否有匹配的肤质
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
         
-        # Define CSS style based on recommendation
-        if is_recommended:
-            st.markdown(
-                f"""
-                <div style="border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;">
-                    <div style="display: flex; align-items: center;">
-                        <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
-                        <div style="margin-left:20px;">
-                            <h3 style="margin:0;">{row['brand_name']}: {row['product_name']}</h3>
-                            <span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>
-                            <p><strong>Price:</strong> ${row['price']}</p>
-                            <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
-                            <p><strong>Brand:</strong> {row['brand_name']}</p>
-                            {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
-                            {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
-                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
-                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
-                        </div>
-                    </div>
-                </div>
-                <br/>
-                """,
-                unsafe_allow_html=True
-            )
+        # 处理适用肤质和成分显示，去除方括号和单引号
+        if suitable_type:
+            product_skin_types_display = ", ".join([skin.strip().strip("'").strip('"') for skin in suitable_type.split(',') if skin.strip()])
+            suitable_display = f"<p><strong>Suitable for:</strong> " + ", ".join([
+                f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin}</span>" 
+                for skin in product_skin_types_display.split(", ")
+            ]) + "</p>"
         else:
-            st.markdown(
-                f"""
-                <div style="border:1px solid #ccc; padding:10px; border-radius:5px;">
-                    <div style="display: flex; align-items: center;">
-                        <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
-                        <div style="margin-left:20px;">
-                            <h3 style="margin:0;">{row['brand_name']}: {row['product_name']}</h3>
-                            <p><strong>Price:</strong> ${row['price']}</p>
-                            <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
-                            <p><strong>Brand:</strong> {row['brand_name']}</p>
-                            {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
-                            {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
-                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
-                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
-                        </div>
+            suitable_display = ""
+        
+        if ingredients:
+            product_ingredients_display = ", ".join([ing.strip().strip("'").strip('"') for ing in ingredients.split(',') if ing.strip()])
+            ingredients_display = f"<p><strong>Ingredients:</strong> " + ", ".join([
+                f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing}</span>" 
+                for ing in product_ingredients_display.split(", ")
+            ]) + "</p>"
+        else:
+            ingredients_display = ""
+        
+        # 定义 CSS 样式基于推荐
+        if is_recommended:
+            badge = """
+                <span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>
+            """
+            container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
+        else:
+            badge = ""
+            container_style = "border:1px solid #ccc; padding:10px; border-radius:5px;"
+        
+        # 构建 HTML 内容
+        html_content = f"""
+            <div style="{container_style}">
+                <div style="display: flex; align-items: center;">
+                    <img src="https://via.placeholder.com/150" width="150" style="border-radius:5px;">
+                    <div style="margin-left:20px;">
+                        <h3 style="margin:0;">{brand_name}: {product_name}</h3>
+                        {badge}
+                        <p><strong>Price:</strong> ${price}</p>
+                        <p><strong>Rating:</strong> {rating} ({reviews} reviews)</p>
+                        <p><strong>Brand:</strong> {brand_name}</p>
+                        {suitable_display}
+                        {ingredients_display}
+                        {"<p><strong>Sentiment:</strong> " + str(sentiment) + "</p>" if sentiment else ""}
+                        {"<p><strong>Review:</strong> " + first_sentence + "</p>" if first_sentence else ""}
                     </div>
                 </div>
-                <br/>
-                """,
-                unsafe_allow_html=True
-            )
+            </div>
+            <br/>
+        """
+        
+        st.markdown(
+            html_content,
+            unsafe_allow_html=True
+        )
