@@ -7,8 +7,8 @@ import re
 @st.cache_resource
 def load_data():
     # Load datasets
-    df_credo = pd.read_csv('data/credo_finaldata.csv')
-    df_sephora = pd.read_csv('data/sephoraproduct_info.csv')
+    df_credo = pd.read_csv('credo_finaldata.csv')
+    df_sephora = pd.read_csv('sephoraproduct_info.csv')
     
     # Clean and standardize columns for Credo
     df_credo.rename(columns={
