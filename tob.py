@@ -338,7 +338,6 @@ if page == "Overview Metrics":
     else:
         st.write('No common brands between Credo and Sephora.')
 
-### Product Showcase Page
 elif page == "Product Showcase":
     st.title("Product Showcase")
     
@@ -369,7 +368,7 @@ elif page == "Product Showcase":
         # Check if recommended
         is_recommended = False
         if selected_skin_type:
-            product_skin_types = row['suitable_ type'].split(',') if isinstance(row['suitable_type'], str) else []
+            product_skin_types = row['suitable_type'].split(',') if isinstance(row['suitable_type'], str) else []
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
         
         # Define CSS style based on recommendation
@@ -387,8 +386,8 @@ elif page == "Product Showcase":
                             <p><strong>Brand:</strong> {row['brand_name']}</p>
                             {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
                             {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
-                            {"<p><strong>Sentiment:</strong> " + row['sentiment'] + "</p>" if row.get('sentiment') else ""}
-                            {"<p><strong>Review:</strong> " + row['first_sentence'] + "</p>" if row.get('first_sentence') else ""}
+                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
+                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
                         </div>
                     </div>
                 </div>
@@ -409,8 +408,8 @@ elif page == "Product Showcase":
                             <p><strong>Brand:</strong> {row['brand_name']}</p>
                             {"<p><strong>Suitable for:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{skin.strip()}</span>" for skin in row['suitable_type'].split(',')]) + "</p>" if row.get('suitable_type') else ""}
                             {"<p><strong>Ingredients:</strong> " + ", ".join([f"<span style='background-color:#e0e0e0; padding:2px 4px; border-radius:3px; margin-right:2px;'>{ing.strip()}</span>" for ing in row['ingredients'].split(',')]) + "</p>" if row.get('ingredients') else ""}
-                            {"<p><strong>Sentiment:</strong> " + row['sentiment'] + "</p>" if row.get('sentiment') else ""}
-                            {"<p><strong>Review:</strong> " + row['first_sentence'] + "</p>" if row.get('first_sentence') else ""}
+                            {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
+                            {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
                         </div>
                     </div>
                 </div>
