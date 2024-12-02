@@ -418,11 +418,11 @@ elif page == "Product Showcase":
             is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
     
         # 定义 CSS 样式
+        badge = ""
         if is_recommended:
             badge = '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             container_style = "border:2px solid #4CAF50; padding:10px; border-radius:5px; background-color:#f9fff9;"
         else:
-            badge = ""
             container_style = "border:1px solid #ccc; padding:10px; border-radius:5px; background-color:#ffffff;"
     
         # 构建 HTML 内容
@@ -446,6 +446,7 @@ elif page == "Product Showcase":
             <br/>
         """
     
-        # 渲染 HTML 内容
+        # 渲染 HTML 内容（确保所有情况都用 unsafe_allow_html）
         st.markdown(html_content, unsafe_allow_html=True)
+
 
