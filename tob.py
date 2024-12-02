@@ -434,8 +434,8 @@ elif page == "Product Showcase":
     
         # 定义 CSS 样式和徽章
         if is_recommend:
-            badge = '<span style="background-color:#26725e; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
-            container_style = "border:2px solid #26725e; padding:10px; border-radius:5px; background-color:#e5fff6;"
+            badge = '<span style="background-color:#a4d1b8; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
+            container_style = "border:2px solid #a4d1b8; padding:10px; border-radius:5px; background-color:#f3fbf6;"
         elif is_good:
             badge = '<span style="background-color:#fec692; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Good Match</span>'
             container_style = "border:2px solid #fec692; padding:10px; border-radius:5px; background-color:#fff9f1;"
