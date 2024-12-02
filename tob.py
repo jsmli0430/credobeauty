@@ -359,24 +359,45 @@ elif page == "Product Showcase":
     filtered_df = df_credo[
         (df_credo['price'] >= price_range[0]) & 
         (df_credo['price'] <= price_range[1])
-    ].fillna(0)  # 替换 NaN 为 0
+    ].fillna(0)  # Replace NaN with 0
     
+    # Clean and process 'suitable_type' for consistent matching
+    filtered_df['suitable_type'] = filtered_df['suitable_type'].apply(
+        lambda x: x.lower().strip() if isinstance(x, str) else ""
+    )
+    
+    # Filter recommended products
+    recommended_products = filtered_df[
+        filtered_df['suitable_type'].apply(
+            lambda x: any(skin.strip() in x.split(',') for skin in [s.lower() for s in selected_skin_type])
+        )
+    ]
+    
+    # Non-recommended products
+    non_recommended_products = filtered_df[~filtered_df.index.isin(recommended_products.index)]
+    
+    # Combine: recommended products at the top
+    final_df = pd.concat([recommended_products, non_recommended_products])
+
     # Show number of products
     st.subheader(f"Products Matching Your Preferences ({len(filtered_df)} found)")
     
-    for _, row in filtered_df.iterrows():
-        # Check if recommended
-        is_recommended = False
-        if selected_skin_type:
-            product_skin_types = row['suitable_type'].split(',') if isinstance(row['suitable_type'], str) else []
-            is_recommended = any(skin in product_skin_types for skin in selected_skin_type)
-        
-        # Define CSS style based on recommendation
+    # Display products
+    for _, row in final_df.iterrows():
+        # Determine if this product is recommended
+        is_recommended = row.name in recommended_products.index
+
+        # Recommended label
         recommended_label = (
             '<span style="background-color:#4CAF50; color:white; padding:2px 6px; border-radius:3px; font-size:12px;">Recommended for you</span>'
             if is_recommended else ""
         )
-        
+
+        # Parse and format fields
+        suitable_for = ", ".join(row['suitable_type'].strip("[]").replace("'", "").split(", ")) if row['suitable_type'] else "N/A"
+        ingredients = ", ".join(row['ingredients'].strip("[]").replace("'", "").split(", ")) if row.get('ingredients') else "N/A"
+
+        # Display product details
         st.markdown(
             f"""
             <div style="border:2px solid {'#4CAF50' if is_recommended else '#ccc'}; padding:10px; border-radius:5px; background-color:{'#f9fff9' if is_recommended else 'white'};">
@@ -388,8 +409,8 @@ elif page == "Product Showcase":
                         <p><strong>Price:</strong> ${row['price']}</p>
                         <p><strong>Rating:</strong> {row['rating']} ({row['reviews']} reviews)</p>
                         <p><strong>Brand:</strong> {row['brand_name']}</p>
-                        {"<p><strong>Suitable for:</strong> " + ", ".join(skin.strip() for skin in row['suitable_type'].split(',')) + "</p>" if row.get('suitable_type') else ""}
-                        {"<p><strong>Ingredients:</strong> " + ", ".join(ing.strip() for ing in row['ingredients'].split(',')) + "</p>" if row.get('ingredients') else ""}
+                        <p><strong>Suitable for:</strong> {suitable_for}</p>
+                        <p><strong>Ingredients:</strong> {ingredients}</p>
                         {"<p><strong>Sentiment:</strong> " + str(row['sentiment']) + "</p>" if row.get('sentiment') else ""}
                         {"<p><strong>Review:</strong> " + str(row['first_sentence']) + "</p>" if row.get('first_sentence') else ""}
                     </div>
